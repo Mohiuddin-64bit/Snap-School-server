@@ -28,9 +28,22 @@ async function run() {
     await client.connect();
 
     const popularClass = client.db("snapSchool").collection("popularClass");
-    const popularInstructor = client.db("snapSchool").collection("popularInstructor");
+    const popularInstructor = client
+      .db("snapSchool")
+      .collection("popularInstructor");
+    const selectedClass = client.db("snapSchool").collection("selectedClass");
 
+    // All Class & Instructor
+    app.get("/allClass", async (req, res) => {
+      const result = await popularClass.find().toArray();
+      res.send(result);
+    });
+    app.get("/allInstructor", async (req, res) => {
+      const result = await popularInstructor.find().toArray();
+      res.send(result);
+    });
 
+    // Popular Class & Instructor
     app.get("/popularClass", async (req, res) => {
       const result = await popularClass
         .find()
@@ -39,7 +52,6 @@ async function run() {
         .toArray();
       res.send(result);
     });
-
     app.get("/popularTeacher", async (req, res) => {
       const result = await popularInstructor
         .find()
@@ -48,7 +60,12 @@ async function run() {
       res.send(result);
     });
 
-    
+    app.post("/selectedClass", async (req, res) => {
+      const item = req.body;
+      const result = await selectedClass.insertOne(item);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(

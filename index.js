@@ -39,12 +39,38 @@ async function run() {
       .collection("selectedClass");
 
     // Users related API
-    app.post("/users", async (req, res) => {
-      const item = req.body;
-      const result = await usersCollection.insertOne(item);
+    app.get("/users", async (req, res) => {
+      const result = await usersCollection.find().toArray();
       res.send(result);
     });
 
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email };
+      const existingUser = await usersCollection.findOne(query);
+      if (existingUser) {
+        res.send({ message: "User already Exists" });
+      } else {
+        const result = await usersCollection.insertOne(user);
+        res.send(result);
+      }
+    });
+
+    app.patch("/users/admin/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+      const result = await usersCollection.updateOne(query, updatedDoc);
+      res.send(result);
+    });
+
+
+
+    
     // All Class & Instructor
     app.get("/allClass", async (req, res) => {
       const result = await popularClassCollection.find().toArray();
@@ -93,7 +119,7 @@ async function run() {
     app.delete("/selectedClass/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await selectedClass.deleteOne(query);
+      const result = await selectedClassCollection.deleteOne(query);
       res.send(result);
     });
 

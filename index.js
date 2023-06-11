@@ -10,7 +10,7 @@ app.use(express.json());
 
 // Mongodb server
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASS}@cluster0.bfg1fsg.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -27,25 +27,37 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const popularClass = client.db("snapSchool").collection("popularClass");
-    const popularInstructor = client
+    const usersCollection = client.db("snapSchool").collection("users");
+    const popularClassCollection = client
+      .db("snapSchool")
+      .collection("popularClass");
+    const popularInstructorCollection = client
       .db("snapSchool")
       .collection("popularInstructor");
-    const selectedClass = client.db("snapSchool").collection("selectedClass");
+    const selectedClassCollection = client
+      .db("snapSchool")
+      .collection("selectedClass");
+
+    // Users related API
+    app.post("/users", async (req, res) => {
+      const item = req.body;
+      const result = await usersCollection.insertOne(item);
+      res.send(result);
+    });
 
     // All Class & Instructor
     app.get("/allClass", async (req, res) => {
-      const result = await popularClass.find().toArray();
+      const result = await popularClassCollection.find().toArray();
       res.send(result);
     });
     app.get("/allInstructor", async (req, res) => {
-      const result = await popularInstructor.find().toArray();
+      const result = await popularInstructorCollection.find().toArray();
       res.send(result);
     });
 
     // Popular Class & Instructor
     app.get("/popularClass", async (req, res) => {
-      const result = await popularClass
+      const result = await popularClassCollection
         .find()
         .sort({ enrolledStudents: -1 }) // Sort in descending order based on enrolledStudents
         .limit(6) // Limit the result to top 6 classes
@@ -53,16 +65,17 @@ async function run() {
       res.send(result);
     });
     app.get("/popularTeacher", async (req, res) => {
-      const result = await popularInstructor
+      const result = await popularInstructorCollection
         .find()
         .sort({ classesTaken: -1 })
         .toArray();
       res.send(result);
     });
 
+    // My Selected class API
     app.post("/selectedClass", async (req, res) => {
       const item = req.body;
-      const result = await selectedClass.insertOne(item);
+      const result = await selectedClassCollection.insertOne(item);
       res.send(result);
     });
 
@@ -72,11 +85,17 @@ async function run() {
         res.send([]);
       } else {
         const query = { email: email };
-        const result = await selectedClass.find(query).toArray();
+        const result = await selectedClassCollection.find(query).toArray();
         res.send(result);
       }
     });
-    
+
+    app.delete("/selectedClass/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await selectedClass.deleteOne(query);
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });

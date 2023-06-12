@@ -43,10 +43,10 @@ async function run() {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
-    app.get("/users/:email", async (req, res) => {
-      const email = req.params.email;
+    app.get("/usersE", async (req, res) => {
+      const email = req.query.email;
       const query = {email: email}
-      const result = await usersCollection.findOne(email, query).toArray();
+      const result = await usersCollection.find(query).toArray();
       res.send(result);
     });    
     
@@ -96,6 +96,11 @@ async function run() {
     // All Class & Instructor
     app.get("/allClass", async (req, res) => {
       const result = await popularClassCollection.find().toArray();
+      res.send(result);
+    });
+    app.post("/allClass", async (req, res) => {
+      const classes = req.body;
+      const result = await popularClassCollection.insertOne(classes);
       res.send(result);
     });
     app.get("/allInstructor", async (req, res) => {

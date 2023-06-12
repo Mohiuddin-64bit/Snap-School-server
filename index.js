@@ -43,6 +43,13 @@ async function run() {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = {email: email}
+      const result = await usersCollection.findOne(email, query).toArray();
+      res.send(result);
+    });    
+    
 
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -79,9 +86,13 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
 
-
-    
     // All Class & Instructor
     app.get("/allClass", async (req, res) => {
       const result = await popularClassCollection.find().toArray();

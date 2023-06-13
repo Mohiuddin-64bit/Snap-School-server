@@ -96,14 +96,39 @@ async function run() {
       res.send(result);
     });
 
+
     // All Class & Instructor
     app.get("/allClass", async (req, res) => {
-      const result = await popularClassCollection.find().toArray();
+      const result = await selectedClassCollection.find().toArray();
       res.send(result);
     });
     app.post("/allClass", async (req, res) => {
       const classes = req.body;
-      const result = await popularClassCollection.insertOne(classes);
+      const result = await selectedClassCollection.insertOne(classes);
+      res.send(result);
+    });
+    // Approved Method
+    app.patch("/allClass/approved/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          status: "Approved",
+        },
+      };
+      const result = await selectedClassCollection.updateOne(query, updatedDoc);
+      res.send(result);
+    });
+    // Denied Method
+    app.patch("/allClass/denied/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          status: "Denied",
+        },
+      };
+      const result = await selectedClassCollection.updateOne(query, updatedDoc);
       res.send(result);
     });
     app.get("/allInstructor", async (req, res) => {

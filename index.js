@@ -46,11 +46,11 @@ async function run() {
     // Find User by email
     app.get("/usersE", async (req, res) => {
       const email = req.query.email;
-      const query = {email: email}
+      const query = { email: email };
       const result = await usersCollection.find(query).toArray();
       res.send(result);
-    });    
-    
+    });
+
     // save user info to database
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -96,7 +96,6 @@ async function run() {
       res.send(result);
     });
 
-
     // All Class & Instructor
     app.get("/allClass", async (req, res) => {
       const result = await selectedClassCollection.find().toArray();
@@ -138,7 +137,7 @@ async function run() {
 
     // Popular Class & Instructor
     app.get("/popularClass", async (req, res) => {
-      const result = await popularClassCollection
+      const result = await selectedClassCollection
         .find()
         .sort({ enrolledStudents: -1 }) // Sort in descending order based on enrolledStudents
         .limit(6) // Limit the result to top 6 classes
@@ -146,9 +145,9 @@ async function run() {
       res.send(result);
     });
     app.get("/popularTeacher", async (req, res) => {
-      const result = await popularInstructorCollection
+      const result = await selectedClassCollection
         .find()
-        .sort({ classesTaken: -1 })
+        .limit(6)
         .toArray();
       res.send(result);
     });
